@@ -187,6 +187,63 @@ const getPersonalRecords = async (req, res) => {
   }
 };
 
+// Get Workout Streak (current + longest consecutive-day streak)
+const getWorkoutStreak = async (req, res) => {
+  try {
+    const workouts = await Workout.find({ userId: req.userId }).sort({ date: -1 });
+
+    if (workouts.length === 0) {
+      return res.status(200).json({ currentStreak: 0, longestStreak: 0, lastWorkoutDate: null });
+    }
+
+    // Collect unique workout days (as YYYY-MM-DD) since multiple workouts can happen on the same day
+    const dayKey = (d) => {
+      const date = new Date(d);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    };
+
+    const uniqueDays = [...new Set(workouts.map((w) => dayKey(w.date)))].sort((a, b) => b - a);
+
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const today = dayKey(new Date());
+    const yesterday = today - oneDayMs;
+
+    // Current streak: only counts if the most recent workout was today or yesterday
+    let currentStreak = 0;
+    if (uniqueDays[0] === today || uniqueDays[0] === yesterday) {
+      currentStreak = 1;
+      for (let i = 0; i < uniqueDays.length - 1; i++) {
+        if (uniqueDays[i] - uniqueDays[i + 1] === oneDayMs) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Longest streak: scan through all unique days
+    let longestStreak = 1;
+    let running = 1;
+    for (let i = 0; i < uniqueDays.length - 1; i++) {
+      if (uniqueDays[i] - uniqueDays[i + 1] === oneDayMs) {
+        running++;
+        longestStreak = Math.max(longestStreak, running);
+      } else {
+        running = 1;
+      }
+    }
+
+    res.status(200).json({
+      currentStreak,
+      longestStreak,
+      lastWorkoutDate: workouts[0].date,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addWorkout,
   getAllWorkouts,
@@ -195,4 +252,5 @@ module.exports = {
   deleteWorkout,
   getWorkoutStats,
   getPersonalRecords,
+  getWorkoutStreak,
 };

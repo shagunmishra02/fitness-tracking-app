@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/auth');
 const workoutRoutes = require('./routes/workouts');
+const goalRoutes = require('./routes/goals');
 
 // Connect to database
 connectDB();
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

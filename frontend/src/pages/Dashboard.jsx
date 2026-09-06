@@ -3,12 +3,15 @@ import axios from 'axios';
 import WorkoutForm from '../components/WorkoutForm';
 import WorkoutList from '../components/WorkoutList';
 import ProgressChart from '../components/ProgressChart';
+import StreakTracker from '../components/StreakTracker';
+import GoalTracker from '../components/GoalTracker';
 import './Dashboard.css';
 
 function Dashboard() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchWorkouts();
@@ -38,10 +41,12 @@ function Dashboard() {
 
   const handleWorkoutAdded = (newWorkout) => {
     setWorkouts([newWorkout, ...workouts]);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleWorkoutDeleted = (id) => {
     setWorkouts(workouts.filter((w) => w._id !== id));
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   return (
@@ -50,6 +55,9 @@ function Dashboard() {
         <h1>💪 Fitness Dashboard</h1>
 
         {error && <div className="error-message">{error}</div>}
+
+        <StreakTracker refreshTrigger={refreshTrigger} />
+        <GoalTracker refreshTrigger={refreshTrigger} />
 
         <WorkoutForm onWorkoutAdded={handleWorkoutAdded} />
 

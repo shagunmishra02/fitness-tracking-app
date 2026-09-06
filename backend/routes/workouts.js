@@ -7,6 +7,7 @@ const {
   deleteWorkout,
   getWorkoutStats,
   getPersonalRecords,
+  getWorkoutStreak,
 } = require('../controllers/workoutController');
 const authMiddleware = require('../middleware/auth');
 
@@ -19,6 +20,7 @@ router.post('/', addWorkout);
 router.get('/', getAllWorkouts);
 router.get('/stats', getWorkoutStats);
 router.get('/prs', getPersonalRecords);
+router.get('/streak', getWorkoutStreak);
 router.get('/:id', getWorkoutById);
 router.put('/:id', updateWorkout);
 router.delete('/:id', deleteWorkout);
