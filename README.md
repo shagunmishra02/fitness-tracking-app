@@ -7,6 +7,9 @@ A full-stack web application for tracking fitness workouts, monitoring progress,
 ✨ **Core Features**
 - 🔐 Secure user authentication with JWT
 - 📝 Comprehensive workout logging (strength, cardio, flexibility)
+- 🔥 Auto-calculated calories burned (based on muscle group, duration, intensity & body weight)
+- 🔥 Workout streak tracker (current streak + longest streak)
+- 🎯 Goal setting (weekly/monthly targets for workouts, calories, or minutes trained)
 - 📊 Real-time progress tracking with charts
 - 🏆 Personal records (PR) tracking
 - 👤 User profile management
@@ -218,6 +221,21 @@ GET /api/workouts/prs
 Authorization: Bearer {token}
 ```
 
+#### Get Workout Streak
+```http
+GET /api/workouts/streak
+Authorization: Bearer {token}
+```
+
+Returns:
+```json
+{
+  "currentStreak": 3,
+  "longestStreak": 12,
+  "lastWorkoutDate": "2026-09-05T00:00:00.000Z"
+}
+```
+
 #### Update Workout
 ```http
 PUT /api/workouts/{id}
@@ -228,6 +246,55 @@ Content-Type: application/json
 #### Delete Workout
 ```http
 DELETE /api/workouts/{id}
+Authorization: Bearer {token}
+```
+
+### Goal Endpoints
+
+#### Set/Update a Goal
+```http
+POST /api/goals
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "metric": "workouts",
+  "period": "weekly",
+  "targetValue": 4
+}
+```
+
+`metric` options: `workouts`, `calories`, `duration`
+`period` options: `weekly`, `monthly`
+
+Setting a goal for a metric+period combo you already have will update it (upsert) rather than create a duplicate.
+
+#### Get All Goals (with live progress)
+```http
+GET /api/goals
+Authorization: Bearer {token}
+```
+
+Returns each goal with live-calculated progress for the current week/month:
+```json
+{
+  "goals": [
+    {
+      "_id": "...",
+      "metric": "workouts",
+      "period": "weekly",
+      "targetValue": 4,
+      "currentValue": 2,
+      "percentage": 50,
+      "isCompleted": false
+    }
+  ]
+}
+```
+
+#### Delete a Goal
+```http
+DELETE /api/goals/{id}
 Authorization: Bearer {token}
 ```
 
@@ -257,6 +324,8 @@ Authorization: Bearer {token}
 - See personal records
 - Track muscle group breakdown
 - Monitor workout history
+- Check your current and longest workout streak on the Dashboard
+- Set a weekly or monthly goal (workouts, calories, or minutes) and watch the progress bar fill up as you log workouts
 
 ### 5. Manage Profile
 - Go to Profile page
@@ -271,9 +340,16 @@ Authorization: Bearer {token}
 ### 💪 Workout Logging
 - Multiple workout types (strength, cardio, flexibility, sports)
 - Support for sets, reps, and weight
-- Distance and calories tracking for cardio
+- Distance tracking for cardio
 - Intensity levels
 - Custom notes for each workout
+- Calories burned are auto-calculated using a MET-based formula (metric × body weight × duration), personalized to the logged-in user's profile weight
+
+### 🔥 Streaks & Goals
+- Current streak: consecutive calendar days with at least one logged workout (still counts if your last workout was yesterday, resets after a full missed day)
+- Longest streak: your all-time best consecutive-day run
+- Set weekly or monthly goals for number of workouts, total calories burned, or total minutes trained
+- Goal progress is calculated live from your actual workout history — no manual tracking needed
 
 ### 📊 Progress Tracking
 - Weight progression charts
@@ -337,14 +413,15 @@ REACT_APP_API_URL=http://localhost:5000
 
 ## Future Enhancements
 
+- 🏆 Achievement badges (streaks, PR milestones, workout counts)
+- 📄 PDF/CSV export of workout history
+- 📏 Body measurements tracking (weight, body fat %, chest/waist/arms over time)
+- 🗂️ Workout templates/routines (save & reuse a set of exercises)
 - 📱 Mobile app (React Native)
 - 🤖 AI workout recommendations
 - 👥 Social features (friend tracking, leaderboards)
-- 📊 Advanced analytics
-- 📄 PDF export
 - ⌚ Wearable integration
 - 🎥 Video tutorials
-- 🏆 Achievement badges
 
 ---
 
